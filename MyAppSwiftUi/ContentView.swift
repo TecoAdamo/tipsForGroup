@@ -11,6 +11,8 @@ struct ContentView: View {
     @State  private var checkAmountText = ""
     @State private  var numberOfPeople = 2
     @State private var tipPercentage = 20
+    @State var isDarkMode: Bool = false
+    
     @FocusState private var amountIsFocus: Bool
     
     let tipPercentages = [10, 15, 20, 25, 0]
@@ -30,47 +32,59 @@ struct ContentView: View {
     }
     
     var body: some View {
-        NavigationView{
-            Form{
-                Section{
-                    //Textfield (input) value for numbers, and text for strings
-                    TextField("Informe o valor: ", text: $checkAmountText)
-                        .keyboardType(.decimalPad)
-                        .focused($amountIsFocus)
-                    Picker("Total de pessoas na mesa: ", selection: $numberOfPeople){
-                        ForEach(2..<100){
-                            Text("\($0) Pessoas")
+        Group {
+            NavigationView{
+                Form{
+                    Section{
+                        //Textfield (input) value for numbers, and text for strings
+                        TextField("Informe o valor: ", text: $checkAmountText)
+                            .keyboardType(.decimalPad)
+                            .focused($amountIsFocus)
+                        Picker("Total de pessoas na mesa: ", selection: $numberOfPeople){
+                            ForEach(2..<100){
+                                Text("\($0) Pessoas")
+                            }
+                        }
+                        .pickerStyle(.navigationLink)
+                    }
+                    Section{
+                        
+                        Picker("Tip percentage", selection: $tipPercentage){
+                            ForEach(tipPercentages, id: \.self){
+                                Text($0, format: .percent)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    } header: {
+                        Text("Porcentagem: ")
+                    }
+                    Section{
+                        Text(totaoPerPerson, format: .currency(code: Locale.current.currency?.identifier ?? "BRL"))
+                    } header: {
+                        Text("Total por pessoa:")
+                    }
+                }
+                .navigationTitle("MonTips")
+                .toolbar{
+                    ToolbarItemGroup(placement: .keyboard){
+                        Spacer()
+                        Button("Concluído"){
+                            amountIsFocus = false
                         }
                     }
-                    .pickerStyle(.navigationLink)
-                }
-                Section{
-                    
-                    Picker("Tip percentage", selection: $tipPercentage){
-                        ForEach(tipPercentages, id: \.self){
-                            Text($0, format: .percent)
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            isDarkMode.toggle()
+                        }) {
+                            Image(systemName: isDarkMode ? "moon.fill" : "sun.max.fill")
+                                .foregroundColor(.blue)
                         }
                     }
-                    .pickerStyle(.segmented)
-                } header: {
-                    Text("Porcentagem: ")
-                }
-                Section{
-                    Text(totaoPerPerson, format: .currency(code: Locale.current.currency?.identifier ?? "BRL"))
-                } header: {
-                    Text("Total por pessoa:")
-                }
-            }
-            .navigationTitle("MonTips")
-            .toolbar{
-                ToolbarItemGroup(placement: .keyboard){
-                    Spacer()
-                    Button("Concluído"){
-                        amountIsFocus = false
-                    }
+
                 }
             }
         }
+        .environment(\.colorScheme, isDarkMode ? .dark : .light)
     }
     
     
